@@ -2,18 +2,20 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const processToken = async (tokenName, tokenValue) => {
   if (!tokenValue) {
-    console.log(`[${tokenName}] Không tìm thấy giá trị token, bỏ qua...`);
+    console.log(`[${tokenName}] Không tìm thấy giá trị token, bỏ qua.`);
     return;
   }
 
   const END_HOUR = 16; // 16:00 (4h chiều)
   let failCount = 0;
-  const MAX_FAILS = 5; // Số lần lỗi liên tiếp thì thoát
+  const MAX_FAILS = 5; // Số lần lỗi liên tiếp thì thoát vòng lặp
 
   while (true) {
     const now = new Date();
+
+    // Dừng nếu đã đến hoặc qua 16:00 chiều
     if (now.getHours() >= END_HOUR) {
-      console.log(`[${tokenName}] Đã đến 16:00 chiều. Dừng tiến trình!`);
+      console.log(`[${tokenName}] 🏁 Đã đến 16:00 chiều. Dừng tiến trình!`);
       break;
     }
 
@@ -44,18 +46,18 @@ const processToken = async (tokenName, tokenValue) => {
       });
 
       const data = await res.json();
-      let waitSeconds = 5;
+      let waitSeconds = 15;
 
       if (data?.data?.receiveLuckyNumber?.program) {
         const prog = data.data.receiveLuckyNumber.program;
 
-        // Nếu chương trình chưa bật trên server
+        // Nếu server trả về program.enabled = false (chưa bật chương trình)
         if (prog.enabled === false) {
-          console.log(`[${tokenName}] ⚠️ Chương trình đang tắt (enabled: false). Thoát script luôn để tránh loop!`);
-          return;
+          console.log(`[${tokenName}] ⚠️ Chương trình đang tắt (enabled: false). Thoát script để tránh loop!`);
+          break;
         }
 
-        failCount = 0;
+        failCount = 0; // Reset số lần lỗi
         const currentNum = data.data.receiveLuckyNumber.number;
         const received = prog.receivedNumbers?.length || 0;
         const max = prog.maxSlots || 10;
@@ -66,20 +68,28 @@ const processToken = async (tokenName, tokenValue) => {
           console.log(`[${tokenName}] 🏁 Đã nhận đủ tối đa ${max} số. Dừng tiến trình!`);
           break;
         }
+
         waitSeconds = (prog.cooldownRemainingSeconds || 2700) + 2;
       } 
-      else if (data?.errors?.[0]?.message) {
-        const msg = data.errors[0].message;
-        const match = msg.match(/remaining seconds:\s*(\d+)/);
+      else if (data?.errors && data.errors.length > 0) {
+        const msg = data.errors[0].message || '';
+        console.warn(`[${tokenName}] ⚠️ API báo lỗi: ${msg}`);
+        const match = msg.match(/remaining seconds:\s*(\d+)/i);
         if (match && match[1]) {
           waitSeconds = parseInt(match[1], 10) + 2;
         } else {
           failCount++;
           waitSeconds = 15;
-          console.warn(`[${tokenName}] ⚠️ Lỗi phản hồi: ${msg}`);
         }
+      } 
+      else {
+        // Phản hồi không đúng định dạng mong đợi
+        failCount++;
+        console.warn(`[${tokenName}] ⚠️ Phản hồi lạ từ server:`, JSON.stringify(data));
+        waitSeconds = 15;
       }
 
+      // Nếu thất bại liên tiếp quá MAX_FAILS lần thì thoát
       if (failCount >= MAX_FAILS) {
         console.log(`[${tokenName}] 🛑 Thất bại liên tiếp ${MAX_FAILS} lần (có thể server chưa mở). Thoát script!`);
         break;
@@ -90,9 +100,9 @@ const processToken = async (tokenName, tokenValue) => {
 
     } catch (e) {
       failCount++;
-      console.error(`[${tokenName}] Lỗi kết nối (Lần ${failCount}/${MAX_FAILS}):`, e);
+      console.error(`[${tokenName}] Lỗi kết nối (Lần ${failCount}/${MAX_FAILS}):`, e.message);
       if (failCount >= MAX_FAILS) {
-        console.log(`[${tokenName}] 🛑 Lỗi kết nối liên tục, dừng script`);
+        console.log(`[${tokenName}] 🛑 Lỗi kết nối liên tục, dừng script.`);
         break;
       }
       await sleep(10000);
@@ -101,7 +111,6 @@ const processToken = async (tokenName, tokenValue) => {
 };
 
 async function main() {
-  // Lấy danh sách token từ các GitHub Secrets đã tạo: HUY, LINH, OANH
   const tokenKeys = ['HUY', 'LINH', 'OANH'];
   const tasks = tokenKeys.map((name) => processToken(name, process.env[name]));
 
