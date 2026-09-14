@@ -2,8 +2,12 @@ name: Daily Auto Jackpot Multi-Token
 
 on:
   schedule:
-    # Chạy mỗi 15 phút, từ 01:30 đến 09:00 UTC (tương đương 08:30 đến 16:00 VN)
-    - cron: '*/15 1-9 * * *'
+    # 08:30 và 08:45 sáng (giờ VN -> 01:30, 01:45 UTC)
+    - cron: '30,45 1 * * *'
+    # Từ 09:00 đến 15:45 (mỗi 15 phút) (giờ VN -> 02:00 đến 08:45 UTC)
+    - cron: '*/15 2-8 * * *'
+    # Đúng 16:00 chiều (giờ VN -> 09:00 UTC)
+    - cron: '0 9 * * *'
   workflow_dispatch:
 
 jobs:
