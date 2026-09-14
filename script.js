@@ -65,7 +65,7 @@ const processToken = async (tokenName, tokenValue) => {
         const cooldown = prog.cooldownRemainingSeconds || 0;
         if (cooldown > 0 && cooldown <= 180) {
           // Nếu cooldown còn rất ngắn (<= 3 phút), đứng đợi luôn rồi gọi lại ngay!
-          console.log(`[${tokenName}] ⏳ Cooldown ngắn (${cooldown}s), đang đợi để lấy luôn...`);
+          console.log(`[${tokenName}] ⏳ Cooldown ngắn (${cooldown}s), đang đợi để lấy luôn....`);
           await sleep((cooldown + 2) * 1000);
           attempts++;
           continue; // Vòng lặp retry gọi lại ngay
@@ -73,7 +73,7 @@ const processToken = async (tokenName, tokenValue) => {
           console.log(`[${tokenName}] ⏳ Đang cooldown (${Math.round(cooldown / 60)} phút nữa). Để lượt quét sau lấy.`);
           return;
         }
-      } 
+      }
       else if (data?.errors && data.errors.length > 0) {
         const msg = data.errors[0].message || '';
         const match = msg.match(/remaining seconds:\s*(\d+)/i);
@@ -88,7 +88,7 @@ const processToken = async (tokenName, tokenValue) => {
         }
         console.log(`[${tokenName}] ℹ️ ${msg}`);
         return;
-      } 
+      }
       else {
         console.log(`[${tokenName}] Phản hồi khác:`, JSON.stringify(data));
         return;
@@ -105,7 +105,7 @@ const processToken = async (tokenName, tokenValue) => {
 async function main() {
   const tokenKeys = ['HUY', 'LINH', 'OANH'];
   console.log(`Bắt đầu quét lượt nhận số cho: ${tokenKeys.join(', ')}...`);
-  
+
   for (const name of tokenKeys) {
     await processToken(name, process.env[name]);
   }
