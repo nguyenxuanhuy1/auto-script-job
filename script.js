@@ -92,7 +92,7 @@ const processToken = async (tokenName, tokenValue) => {
       failCount++;
       console.error(`[${tokenName}] Lỗi kết nối (Lần ${failCount}/${MAX_FAILS}):`, e);
       if (failCount >= MAX_FAILS) {
-        console.log(`[${tokenName}] 🛑 Lỗi kết nối liên tục, dừng script.`);
+        console.log(`[${tokenName}] 🛑 Lỗi kết nối liên tục, dừng script`);
         break;
       }
       await sleep(10000);
