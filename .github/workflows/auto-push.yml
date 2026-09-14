@@ -2,14 +2,13 @@ name: Daily Auto Jackpot Multi-Token
 
 on:
   schedule:
-    # 8:30 AM giờ Việt Nam (UTC+7) -> 01:30 UTC
     - cron: '30 1 * * *'
   workflow_dispatch:
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
-    timeout-minutes: 450 # Đủ thời gian chạy từ 8:30 đến 16:00 (7.5 tiếng)
+    timeout-minutes: 450
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
