@@ -28,4 +28,5 @@ jobs:
           HUY: ${{ secrets.HUY }}
           LINH: ${{ secrets.LINH }}
           OANH: ${{ secrets.OANH }}
+          PHU: ${{ secrets.PHU }}
         run: node script.js
