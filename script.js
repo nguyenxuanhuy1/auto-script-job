@@ -103,7 +103,7 @@ const processToken = async (tokenName, tokenValue) => {
 };
 
 async function main() {
-  const tokenKeys = ['HUY', 'LINH', 'OANH'];
+  const tokenKeys = ['HUY', 'LINH', 'OANH', 'PHU'];
   console.log(`Bắt đầu quét lượt nhận số cho: ${tokenKeys.join(', ')}...`);
 
   for (const name of tokenKeys) {
